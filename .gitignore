@@ -1,0 +1,7 @@
+*.dat
+*.jpg
+*.png
+*.tfrecords
+.idea
+__pycache__
+train
