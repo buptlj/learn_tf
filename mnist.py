@@ -43,8 +43,7 @@ def inputs(filenames, examples_num, batch_size, shuffle):
         else:
             images, labels = tf.train.batch([image, label], batch_size=batch_size,
                                             num_threads=num_process_threads,
-                                            capacity=min_queue_examples + batch_size * 3,
-                                            min_after_dequeue=min_queue_examples)
+                                            capacity=min_queue_examples + batch_size * 3)
         return images, labels
 
 

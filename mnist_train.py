@@ -4,8 +4,8 @@ import mnist
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('max_step', 1000, 'Number of steps to run trainer')
-tf.app.flags.DEFINE_integer('batch_size', 16, 'the width of image')
-tf.app.flags.DEFINE_string('train_dir', './train', 'the width of image')
+tf.app.flags.DEFINE_integer('batch_size', 128, 'Number of images to process in a batch')
+tf.app.flags.DEFINE_string('train_dir', './train', 'Directory where to write event logs and checkpoint')
 
 
 def train():
@@ -33,11 +33,15 @@ def train():
             # print(predict, '\n', label)
             if i % 100 == 0:
                 print('step: {}, loss: {}'.format(i, train_loss))
-                print(predict, '\n', label)
+                # print(predict, '\n', label)
                 saver.save(sess, ckpt, global_step=i)
 
         coord.request_stop()
         coord.join(threads)
 
+
 if __name__ == '__main__':
+    if tf.gfile.Exists(FLAGS.train_dir):
+        tf.gfile.DeleteRecursively(FLAGS.train_dir)
+    tf.gfile.MakeDirs(FLAGS.train_dir)
     train()
