@@ -10,6 +10,17 @@ VALIDATION_EXAMPLES_NUM = 5000
 TEST_EXAMPLES_NUM = 10000
 
 
+def parse_data(example_proto):
+    features = {'img_raw': tf.FixedLenFeature([], tf.string, ''),
+                'label': tf.FixedLenFeature([], tf.int64, 0)}
+    parsed_features = tf.parse_single_example(example_proto, features)
+    image = tf.decode_raw(parsed_features['img_raw'], tf.uint8)
+    label = tf.cast(parsed_features['label'], tf.int64)
+    image = tf.reshape(image, [FLAGS.image_height, FLAGS.image_width, 1])
+    image = tf.cast(image, tf.float32)
+    return image, label
+
+
 def read_mnist_tfrecords(filename_queue):
     reader = tf.TFRecordReader()
     _, serialized_example = reader.read(filename_queue)
@@ -55,7 +66,7 @@ def inference(images, training):
                                  padding='same',
                                  activation=tf.nn.relu)
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)      # 14*14*32
 
     with tf.variable_scope('conv2'):
         conv2 = tf.layers.conv2d(inputs=pool1,
@@ -64,10 +75,10 @@ def inference(images, training):
                                  padding='same',
                                  activation=tf.nn.relu)
 
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)      # 7*7*64
 
     with tf.variable_scope('fc1'):
-        pool2_flat = tf.reshape(pool2, [images.get_shape().as_list()[0], -1])
+        pool2_flat = tf.reshape(pool2, [-1, 7*7*64])
         fc1 = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
         dropout1 = tf.layers.dropout(inputs=fc1, rate=0.4, training=training)
 

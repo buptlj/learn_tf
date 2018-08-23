@@ -18,7 +18,7 @@ def eval_once(saver, top_k_op):
         try:
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-            iter_per_epoch = int(mnist.VALIDATION_EXAMPLES_NUM / FLAGS.batch_size) + 1
+            iter_per_epoch = mnist.VALIDATION_EXAMPLES_NUM // FLAGS.batch_size + 1
 
             total_sample = iter_per_epoch * FLAGS.batch_size
             correct_predict = 0

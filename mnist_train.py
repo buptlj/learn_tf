@@ -3,7 +3,7 @@ import os
 import mnist
 
 FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_integer('max_step', 12000, 'Number of steps to run trainer')
+tf.app.flags.DEFINE_integer('max_step', 1200, 'Number of steps to run trainer')
 tf.app.flags.DEFINE_integer('batch_size', 128, 'Number of images to process in a batch')
 tf.app.flags.DEFINE_string('train_dir', './train', 'Directory where to write event logs and checkpoint')
 
