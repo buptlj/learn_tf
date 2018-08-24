@@ -4,12 +4,10 @@ import mnist
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('max_step', 1200, 'Number of steps to run trainer')
-tf.app.flags.DEFINE_integer('batch_size', 128, 'Number of images to process in a batch')
 tf.app.flags.DEFINE_string('train_dir', './train', 'Directory where to write event logs and checkpoint')
 
 
 def train():
-    # filenames = tf.placeholder(tf.string, [None])
     images, labels = mnist.inputs(['train_img.tfrecords'], mnist.TRAIN_EXAMPLES_NUM,
                                   FLAGS.batch_size, shuffle=True)
     global_step = tf.train.get_or_create_global_step()
@@ -36,7 +34,6 @@ def train():
                 print('step: {}, loss: {}'.format(i, train_loss))
                 # print(predict, '\n', label)
                 saver.save(sess, ckpt, global_step=i)
-                # eval_validation(saver, sess)
 
         coord.request_stop()
         coord.join(threads)

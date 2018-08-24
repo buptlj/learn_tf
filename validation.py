@@ -2,6 +2,7 @@ import tensorflow as tf
 import mnist
 import numpy as np
 import time
+import math
 
 
 def eval_once(saver, top_k_op):
@@ -18,7 +19,7 @@ def eval_once(saver, top_k_op):
         try:
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-            iter_per_epoch = mnist.VALIDATION_EXAMPLES_NUM // FLAGS.batch_size + 1
+            iter_per_epoch = int(math.ceil(mnist.VALIDATION_EXAMPLES_NUM / FLAGS.batch_size))
 
             total_sample = iter_per_epoch * FLAGS.batch_size
             correct_predict = 0
@@ -58,7 +59,6 @@ def evaluation():
 if __name__ == '__main__':
     FLAGS = tf.app.flags.FLAGS
     tf.app.flags.DEFINE_integer('eval_interval_secs', 100, 'How often to run the eval')
-    tf.app.flags.DEFINE_integer('batch_size', 100, 'Number of images to process in a batch')
     tf.app.flags.DEFINE_string('train_dir', './train', 'Directory where to write event logs and checkpoint')
     tf.app.flags.DEFINE_boolean('run_once', True, 'whether to run eval only once')
 

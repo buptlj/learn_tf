@@ -4,7 +4,7 @@ from tensorflow.contrib import slim
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('image_height', 28, 'the height of image')
 tf.app.flags.DEFINE_integer('image_width', 28, 'the width of image')
-
+tf.app.flags.DEFINE_integer('batch_size', 128, 'Number of images to process in a batch')
 TRAIN_EXAMPLES_NUM = 55000
 VALIDATION_EXAMPLES_NUM = 5000
 TEST_EXAMPLES_NUM = 10000
@@ -97,9 +97,19 @@ def loss(logits, labels):
 
 
 def train(total_loss, global_step):
-    # opt = tf.train.GradientDescentOptimizer(0.01)
+    num_batches_per_epoch = TRAIN_EXAMPLES_NUM / FLAGS.batch_size
+    decay_steps = int(num_batches_per_epoch * 10)
+
+    # Decay the learning rate exponentially based on the number of steps.
+    lr = tf.train.exponential_decay(learning_rate=0.001,
+                                    global_step=global_step,
+                                    decay_steps=decay_steps,
+                                    decay_rate=0.1,
+                                    staircase=True)
+
+    # opt = tf.train.GradientDescentOptimizer(lr)
     # opt = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.99)
-    opt = tf.train.AdamOptimizer(learning_rate=0.001)
+    opt = tf.train.AdamOptimizer(learning_rate=lr)
     grad = opt.compute_gradients(total_loss)
     apply_grad_op = opt.apply_gradients(grad, global_step)
 
