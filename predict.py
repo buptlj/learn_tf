@@ -19,8 +19,8 @@ def pred(filename, train_dir):
             print('no checkpoint file')
             return
         pre = sess.run(predict)
-        print('model:{}, file:{}, label: {}, acc: {}'.
-              format(ckpt.model_checkpoint_path, filename, np.argmax(pre[0]), np.max(pre[0])))
+        print('model:{}, file:{}, label: {} ({:.2f}%)'.
+              format(ckpt.model_checkpoint_path, filename, np.argmax(pre[0]), np.max(pre[0]) * 100))
 
 
 if __name__ == '__main__':
