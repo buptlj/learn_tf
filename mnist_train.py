@@ -13,7 +13,6 @@ def train():
     global_step = tf.train.get_or_create_global_step()
 
     logits, pred = mnist.inference(images, training=True)
-    # logits, pred = mnist.model(images=images, labels=labels)
     loss = mnist.loss(logits, labels)
     train_op = mnist.train(loss, global_step)
     saver = tf.train.Saver()
