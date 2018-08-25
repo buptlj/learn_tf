@@ -132,3 +132,69 @@ def model_slim(images, labels):
                                   optimizer='Adam')
 
     return train_op, loss, prob
+
+
+def model_fn(features, labels, mode):
+    with tf.variable_scope('conv1'):
+        conv1 = tf.layers.conv2d(inputs=features,
+                                 filters=32,
+                                 kernel_size=[5, 5],
+                                 padding='same',
+                                 activation=tf.nn.relu)
+
+    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)      # 14*14*32
+
+    with tf.variable_scope('conv2'):
+        conv2 = tf.layers.conv2d(inputs=pool1,
+                                 filters=64,
+                                 kernel_size=[5, 5],
+                                 padding='same',
+                                 activation=tf.nn.relu)
+
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)      # 7*7*64
+
+    with tf.variable_scope('fc1'):
+        pool2_flat = tf.reshape(pool2, [-1, 7*7*64])
+        fc1 = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+        dropout1 = tf.layers.dropout(inputs=fc1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+
+    with tf.variable_scope('logits'):
+        logits = tf.layers.dense(inputs=dropout1, units=10)     # 使用该值计算交叉熵损失
+        predict = tf.nn.softmax(logits)
+
+    predictions = {
+        # Generate predictions (for PREDICT and EVAL mode)
+        "classes": tf.argmax(input=logits, axis=1),
+        # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+        # `logging_hook`.
+        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+    }
+
+    if mode == tf.estimator.ModeKeys.PREDICT:
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        global_step = tf.train.get_global_step()
+        train_op = train(loss, global_step)
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+    # Add evaluation metrics (for EVAL mode)
+    eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
+    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+
+def input_fn(filenames, training):
+    dataset = tf.data.TFRecordDataset(filenames)
+    dataset = dataset.map(parse_data)
+
+    if training:
+        dataset = dataset.shuffle(buffer_size=50000)
+    dataset = dataset.batch(FLAGS.batch_size)
+    if training:
+        dataset = dataset.repeat()
+
+    iterator = dataset.make_one_shot_iterator()
+    features, labels = iterator.get_next()
+    return features, labels
