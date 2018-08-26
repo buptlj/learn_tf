@@ -9,12 +9,15 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 
 def train():
-    mnist_classifier = tf.estimator.Estimator(model_fn=mnist.model_fn, model_dir=FLAGS.train_dir)
+    my_checkpoint_config = tf.estimator.RunConfig(save_checkpoints_steps=100, keep_checkpoint_max=5)
+    mnist_classifier = tf.estimator.Estimator(model_fn=mnist.model_fn, model_dir=FLAGS.train_dir,
+                                              config=my_checkpoint_config)
     tensor_to_log = {'probabilities': 'softmax_tensor'}
     logging_hook = tf.train.LoggingTensorHook(tensors=tensor_to_log, every_n_iter=100)
 
     mnist_classifier.train(input_fn=lambda: mnist.input_fn(['./train_img.tfrecords'], True),
-                           hooks=[logging_hook], steps=FLAGS.max_step)
+                           # hooks=[logging_hook],
+                           steps=FLAGS.max_step)
 
     eval_results = mnist_classifier.evaluate(input_fn=lambda: mnist.input_fn(['./validation_img.tfrecords'], False))
     print(eval_results)
