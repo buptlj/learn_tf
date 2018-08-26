@@ -174,6 +174,8 @@ def model_fn(features, labels, mode):
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+    accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+    tf.summary.scalar('accuracy', accuracy[1])
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         global_step = tf.train.get_global_step()
@@ -181,7 +183,7 @@ def model_fn(features, labels, mode):
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # Add evaluation metrics (for EVAL mode)
-    eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
+    eval_metric_ops = {"my_accuracy": accuracy}
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
