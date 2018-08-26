@@ -183,7 +183,7 @@ def model_fn(features, labels, mode):
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # Add evaluation metrics (for EVAL mode)
-    eval_metric_ops = {"my_accuracy": accuracy}
+    eval_metric_ops = {"eval_accuracy": accuracy}
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
