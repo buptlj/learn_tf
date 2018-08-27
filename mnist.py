@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib import slim
+from tensorflow import keras
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('image_height', 28, 'the height of image')
@@ -200,3 +201,25 @@ def input_fn(filenames, training):
     iterator = dataset.make_one_shot_iterator()
     features, labels = iterator.get_next()
     return features, labels
+
+
+def model_keras():
+    model = keras.Sequential()
+    model.add(keras.layers.Conv2D(filters=32,
+                                  kernel_size=[5, 5],
+                                  padding='same',
+                                  activation=tf.nn.relu,
+                                  input_shape=[FLAGS.image_height, FLAGS.image_width, 1]))
+    model.add(keras.layers.MaxPool2D(pool_size=[2, 2], strides=2))
+    model.add(keras.layers.Conv2D(filters=64,
+                                  kernel_size=[5, 5],
+                                  padding='same',
+                                  activation=tf.nn.relu))
+    model.add(keras.layers.MaxPool2D(pool_size=[2, 2], strides=2))
+    model.add(keras.layers.Flatten(input_shape=[7, 7, 64]))
+    model.add(keras.layers.Dense(units=1024, activation=tf.nn.relu))
+    model.add(keras.layers.Dropout(rate=0.4))
+    model.add(keras.layers.Dense(units=10))
+    model.add(keras.layers.Activation(tf.nn.softmax))
+
+    return model
