@@ -118,12 +118,12 @@ def train(total_loss, global_step):
 
 
 def model_slim(images, labels):
-    net = slim.conv2d(images, 48, [5, 5], scope='conv1')
+    net = slim.conv2d(images, 32, [5, 5], scope='conv1')
     net = slim.max_pool2d(net, [2, 2], scope='pool1')
-    net = slim.conv2d(net, 96, [5, 5], scope='conv2')
+    net = slim.conv2d(net, 64, [5, 5], scope='conv2')
     net = slim.max_pool2d(net, [2, 2], scope='pool2')
     net = slim.flatten(net, scope='flatten')
-    net = slim.fully_connected(net, 512, scope='fully_connected1')
+    net = slim.fully_connected(net, 1024, scope='fully_connected1')
     logits = slim.fully_connected(net, 10, activation_fn=None, scope='fully_connected2')
 
     prob = slim.softmax(logits)
@@ -221,5 +221,8 @@ def model_keras():
     model.add(keras.layers.Dropout(rate=0.4))
     model.add(keras.layers.Dense(units=10))
     model.add(keras.layers.Activation(tf.nn.softmax))
+
+    opt = keras.optimizers.Adam(0.001)
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     return model
