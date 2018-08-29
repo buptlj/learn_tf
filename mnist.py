@@ -119,18 +119,17 @@ def train(total_loss, global_step):
 
 def model_slim(images, labels):
     net = slim.conv2d(images, 32, [5, 5], scope='conv1')
-    net = slim.max_pool2d(net, [2, 2], scope='pool1')
+    net = slim.max_pool2d(net, [2, 2], stride=2, scope='pool1')
     net = slim.conv2d(net, 64, [5, 5], scope='conv2')
-    net = slim.max_pool2d(net, [2, 2], scope='pool2')
+    net = slim.max_pool2d(net, [2, 2], stride=2, scope='pool2')
     net = slim.flatten(net, scope='flatten')
     net = slim.fully_connected(net, 1024, scope='fully_connected1')
     logits = slim.fully_connected(net, 10, activation_fn=None, scope='fully_connected2')
 
     prob = slim.softmax(logits)
     loss = slim.losses.sparse_softmax_cross_entropy(logits, labels)
-    train_op = slim.optimize_loss(loss, slim.get_global_step(),
-                                  learning_rate=0.001,
-                                  optimizer='Adam')
+    global_step = tf.train.get_or_create_global_step()
+    train_op = train(loss, global_step)
 
     return train_op, loss, prob
 
