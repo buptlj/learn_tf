@@ -124,14 +124,26 @@ def model_slim(images, labels):
     net = slim.max_pool2d(net, [2, 2], stride=2, scope='pool2')
     net = slim.flatten(net, scope='flatten')
     net = slim.fully_connected(net, 1024, scope='fully_connected1')
+    net = slim.dropout(net, keep_prob=0.6)
     logits = slim.fully_connected(net, 10, activation_fn=None, scope='fully_connected2')
 
     prob = slim.softmax(logits)
     loss = slim.losses.sparse_softmax_cross_entropy(logits, labels)
-    global_step = tf.train.get_or_create_global_step()
-    train_op = train(loss, global_step)
 
-    return train_op, loss, prob
+    global_step = tf.train.get_or_create_global_step()
+    num_batches_per_epoch = TRAIN_EXAMPLES_NUM / FLAGS.batch_size
+    decay_steps = int(num_batches_per_epoch * 10)
+
+    # Decay the learning rate exponentially based on the number of steps.
+    lr = tf.train.exponential_decay(learning_rate=0.001,
+                                    global_step=global_step,
+                                    decay_steps=decay_steps,
+                                    decay_rate=0.1,
+                                    staircase=True)
+
+    opt = tf.train.AdamOptimizer(learning_rate=lr)
+
+    return opt, loss, prob
 
 
 def model_fn(features, labels, mode):
