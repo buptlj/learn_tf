@@ -117,14 +117,14 @@ def train(total_loss, global_step):
     return apply_grad_op
 
 
-def model_slim(images, labels):
+def model_slim(images, labels, is_training):
     net = slim.conv2d(images, 32, [5, 5], scope='conv1')
     net = slim.max_pool2d(net, [2, 2], stride=2, scope='pool1')
     net = slim.conv2d(net, 64, [5, 5], scope='conv2')
     net = slim.max_pool2d(net, [2, 2], stride=2, scope='pool2')
     net = slim.flatten(net, scope='flatten')
     net = slim.fully_connected(net, 1024, scope='fully_connected1')
-    net = slim.dropout(net, keep_prob=0.6)
+    net = slim.dropout(net, keep_prob=0.6, is_training=is_training)
     logits = slim.fully_connected(net, 10, activation_fn=None, scope='fully_connected2')
 
     prob = slim.softmax(logits)
